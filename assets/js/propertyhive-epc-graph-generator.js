@@ -17,10 +17,10 @@ jQuery(document).ready(function()
 
 		jQuery.ajax({
 		  	type: "POST",
-		  	url: ajax_object.ajax_url,
+		  	url: ph_epc_graph_generator_ajax_object.ajax_url,
 		  	data: { 
 		  		action: 'propertyhive_generate_epc_graph',
-		  		post_id: ajax_object.post_id, 
+		  		post_id: ph_epc_graph_generator_ajax_object.post_id, 
 		  		eer_current: eer_current, 
 		  		eer_potential: eer_potential,
 		  		eir_current: eir_current,

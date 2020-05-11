@@ -106,7 +106,7 @@ final class PH_EPC_Graph_Generator {
             wp_enqueue_script('ph-epc-graph-generator');
 
             // in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
-            wp_localize_script( 'ph-epc-graph-generator', 'ajax_object', array( 
+            wp_localize_script( 'ph-epc-graph-generator', 'ph_epc_graph_generator_ajax_object', array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'post_id' => $post->ID,
             ) );
