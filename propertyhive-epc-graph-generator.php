@@ -91,7 +91,7 @@ final class PH_EPC_Graph_Generator {
     {
         global $pagenow, $post;
 
-        if ( $pagenow != 'post-new.php' && get_post_type($post->ID) == 'property' )
+        if ( $pagenow != 'post-new.php' && isset($post->ID) && get_post_type($post->ID) == 'property' )
         {
             $assets_path = str_replace( array( 'http:', 'https:' ), '', untrailingslashit( plugins_url( '/', __FILE__ ) ) ) . '/assets/';
 
