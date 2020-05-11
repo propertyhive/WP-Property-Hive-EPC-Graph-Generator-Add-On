@@ -5,7 +5,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=N68UH
 Requires at least: 3.8
 Tested up to: 5.4.1
 Stable tag: trunk
-Version: 1.0.0
+Version: 1.0.1
 Homepage: http://wp-property-hive.com/addons/epc-graph-generator/
 
 Add an EPC graph generator to the EPCs section of a property record
@@ -27,6 +27,10 @@ Once installed and activated, you can access the EPC graph generator by navigati
 Updating should work like a charm; as always though, ensure you backup your site just in case.
 
 == Changelog ==
+
+= 1.0.1 =
+* Renamed ajax_object to something more explicit to prevent it conflicting with other plugins
+* Prevented undefined error on admin pages that don't have a $post object set
 
 = 1.0.0 =
 * First working release of the plugin
