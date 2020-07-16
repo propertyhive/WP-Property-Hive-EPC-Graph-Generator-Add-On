@@ -3,9 +3,9 @@ Contributors: PropertyHive,BIOSTALL
 Tags: propertyhive, property hive, property, real estate, software, estate agents, estate agent, epc, epc generator, epc graph
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=N68UHATHAEDLN&lc=GB&item_name=BIOSTALL&no_note=0&cn=Add%20special%20instructions%20to%20the%20seller%3a&no_shipping=1&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.8
-Tested up to: 5.4.1
+Tested up to: 5.4.2
 Stable tag: trunk
-Version: 1.0.1
+Version: 1.0.2
 Homepage: http://wp-property-hive.com/addons/epc-graph-generator/
 
 Add an EPC graph generator to the EPCs section of a property record
@@ -27,6 +27,10 @@ Once installed and activated, you can access the EPC graph generator by navigati
 Updating should work like a charm; as always though, ensure you backup your site just in case.
 
 == Changelog ==
+
+= 1.0.2 =
+* Updated EPC image to include 'Scotland'
+* Decalred support for WordPress 5.4.2
 
 = 1.0.1 =
 * Renamed ajax_object to something more explicit to prevent it conflicting with other plugins
