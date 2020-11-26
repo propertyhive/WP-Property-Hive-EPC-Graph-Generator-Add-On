@@ -237,56 +237,112 @@ final class PH_EPC_Graph_Generator {
 
     public function ajax_propertyhive_generate_epc_graph()
     {
-        $background = dirname(__FILE__) . '/assets/images/background.png';
+        // Determine which EPC graph template to use
+        // If ratings for only one of the ratings have been entered, we'll exclude the other type from the graph
+        $epc_type = '';
+        if ( $_POST['eer_current'] != '' && $_POST['eer_potential'] != '' )
+        {
+            if ( $_POST['eir_current'] != '' && $_POST['eir_potential'] != '' )
+            {
+                $background = dirname(__FILE__) . '/assets/images/background.png';
+                $epc_type = 'eer_eir';
+            }
+            else
+            {
+                $background = dirname(__FILE__) . '/assets/images/background_eer.png';
+                $epc_type = 'eer_only';
+            }
+        }
+        elseif( $_POST['eir_current'] != '' && $_POST['eir_potential'] != '' )
+        {
+            $background = dirname(__FILE__) . '/assets/images/background_eir.png';
+            $epc_type = 'eir_only';
+        }
+        else
+        {
+            header("Content-type:application/json");
+            echo json_encode(array(
+                'success' => false,
+                'error' => 'Please ensure values are present for Current and Potential ratings',
+            ));
+        }
+
         $background = imagecreatefrompng($background);
 
-        list($eer_current_image, $eer_current_y) = $this->convert_value_to_image_and_y($_POST['eer_current']);
-        $eer_current = dirname(__FILE__) . '/assets/images/eer/' . $eer_current_image;
-        $eer_current = imagecreatefrompng($eer_current);
+        // If EER ratings are input, get the correct coloured pointer images and their vertical positions
+        if ( in_array($epc_type, array('eer_eir', 'eer_only')) )
+        {
+            list($eer_current_image, $eer_current_y) = $this->convert_value_to_image_and_y($_POST['eer_current']);
+            $eer_current = dirname(__FILE__) . '/assets/images/eer/' . $eer_current_image;
+            $eer_current = imagecreatefrompng($eer_current);
 
-        list($eer_potential_image, $eer_potential_y) = $this->convert_value_to_image_and_y($_POST['eer_potential']);
-        $eer_potential = dirname(__FILE__) . '/assets/images/eer/' . $eer_potential_image;
-        $eer_potential = imagecreatefrompng($eer_potential);
+            list($eer_potential_image, $eer_potential_y) = $this->convert_value_to_image_and_y($_POST['eer_potential']);
+            $eer_potential = dirname(__FILE__) . '/assets/images/eer/' . $eer_potential_image;
+            $eer_potential = imagecreatefrompng($eer_potential);
+        }
 
-        list($eir_current_image, $eir_current_y) = $this->convert_value_to_image_and_y($_POST['eir_current']);
-        $eir_current = dirname(__FILE__) . '/assets/images/eir/' . $eir_current_image;
-        $eir_current = imagecreatefrompng($eir_current);
+        // If EIR ratings are input, get the correct coloured pointer images and their vertical positions
+        if ( in_array($epc_type, array('eer_eir', 'eir_only')) )
+        {
+            list($eir_current_image, $eir_current_y) = $this->convert_value_to_image_and_y($_POST['eir_current']);
+            $eir_current = dirname(__FILE__) . '/assets/images/eir/' . $eir_current_image;
+            $eir_current = imagecreatefrompng($eir_current);
 
-        list($eir_potential_image, $eir_potential_y) = $this->convert_value_to_image_and_y($_POST['eir_potential']);
-        $eir_potential = dirname(__FILE__) . '/assets/images/eir/' . $eir_potential_image;
-        $eir_potential = imagecreatefrompng($eir_potential);
+            list($eir_potential_image, $eir_potential_y) = $this->convert_value_to_image_and_y($_POST['eir_potential']);
+            $eir_potential = dirname(__FILE__) . '/assets/images/eir/' . $eir_potential_image;
+            $eir_potential = imagecreatefrompng($eir_potential);
+        }
 
-        $output_image = imagecreatetruecolor(957, 404);
+        // Create the background image of the image
+        $background_image_width = $epc_type == 'eer_eir' ? 957 : 471;
+        $output_image = imagecreatetruecolor($background_image_width, 404);
+        imagecopyresized($output_image, $background, 0, 0, 0, 0, $background_image_width, 404, $background_image_width, 404);
 
-        imagecopyresized($output_image, $background, 0, 0, 0, 0, 957, 404, 957, 404);
-        imagecopyresized($output_image, $eer_current, 313, $eer_current_y, 0, 0, 71, 31, 71, 31);
-        imagecopyresized($output_image, $eer_potential, 390, $eer_potential_y, 0, 0, 71, 31, 71, 31);
-        imagecopyresized($output_image, $eir_current, 801, $eir_current_y, 0, 0, 71, 31, 71, 31);
-        imagecopyresized($output_image, $eir_potential, 877, $eir_potential_y, 0, 0, 71, 31, 71, 31);
+        // Place the EER pointers in the correct place on the EPC graph background
+        if ( in_array($epc_type, array('eer_eir', 'eer_only')) )
+        {
+            imagecopyresized($output_image, $eer_current, 313, $eer_current_y, 0, 0, 71, 31, 71, 31);
+            imagecopyresized($output_image, $eer_potential, 390, $eer_potential_y, 0, 0, 71, 31, 71, 31);
+        }
 
-        // Add the text
+        // Place the EIR pointers in the correct place on the EPC graph background
+        if ( in_array($epc_type, array('eer_eir', 'eir_only')) )
+        {
+            $eir_current_x = $epc_type == 'eer_eir' ? 801 : 316;
+            $eir_potential_x = $epc_type == 'eer_eir' ? 877 : 393;
+            imagecopyresized($output_image, $eir_current, $eir_current_x, $eir_current_y, 0, 0, 71, 31, 71, 31);
+            imagecopyresized($output_image, $eir_potential, $eir_potential_x, $eir_potential_y, 0, 0, 71, 31, 71, 31);
+        }
+
+        // Add the rating text to the pointers in the correct position
         $white = imagecolorallocate($output_image, 255, 255, 255);
         $font = dirname(__FILE__) . '/assets/fonts/arial.ttf';
 
-        $text = $_POST['eer_current'];
-        $x = 346;
-        if ( $_POST['eer_current'] > 9 ) { $x = 341; }
-        imagettftext($output_image, 15, 0, $x, $eer_current_y + 23, $white, $font, $text);
+        if ( in_array($epc_type, array('eer_eir', 'eer_only')) )
+        {
+            $text = $_POST['eer_current'];
+            $x = 346;
+            if ( $_POST['eer_current'] > 9 ) { $x = $x-5; }
+            imagettftext($output_image, 15, 0, $x, $eer_current_y + 23, $white, $font, $text);
 
-        $text = $_POST['eer_potential'];
-        $x = 423;
-        if ( $_POST['eer_potential'] > 9 ) { $x = 418; }
-        imagettftext($output_image, 15, 0, $x, $eer_potential_y + 23, $white, $font, $text);
+            $text = $_POST['eer_potential'];
+            $x = 423;
+            if ( $_POST['eer_potential'] > 9 ) { $x = $x-5; }
+            imagettftext($output_image, 15, 0, $x, $eer_potential_y + 23, $white, $font, $text);
+        }
 
-        $text = $_POST['eir_current'];
-        $x = 834;
-        if ( $_POST['eir_current'] > 9 ) { $x = 829; }
-        imagettftext($output_image, 15, 0, $x, $eir_current_y + 23, $white, $font, $text);
+        if ( in_array($epc_type, array('eer_eir', 'eir_only')) )
+        {
+            $text = $_POST['eir_current'];
+            $x = $epc_type == 'eer_eir' ? 834 : 349;
+            if ( $_POST['eir_current'] > 9 ) { $x = $x-5; }
+            imagettftext($output_image, 15, 0, $x, $eir_current_y + 23, $white, $font, $text);
 
-        $text = $_POST['eir_potential'];
-        $x = 910;
-        if ( $_POST['eir_potential'] > 9 ) { $x = 905; }
-        imagettftext($output_image, 15, 0, $x, $eir_potential_y + 23, $white, $font, $text);
+            $text = $_POST['eir_potential'];
+            $x = $epc_type == 'eer_eir' ? 910 : 426;
+            if ( $_POST['eir_potential'] > 9 ) { $x = $x-5; }
+            imagettftext($output_image, 15, 0, $x, $eir_potential_y + 23, $white, $font, $text);
+        }
 
         $tmpfname = tempnam(sys_get_temp_dir(), 'ph_epc');
 

@@ -9,9 +9,13 @@ jQuery(document).ready(function()
 		var eir_current = jQuery('#eir_current').val();
 		var eir_potential = jQuery('#eir_potential').val();
 
-		if ( eer_current == '' || eer_potential == '' || eir_current == '' || eir_potential == '' )
+		var eer_array = [eer_current, eer_potential].filter(Number);
+		var eir_array = [eir_current, eir_potential].filter(Number);
+
+		// Prevent submission if no values have been entered, or only one of current and potential values has been entered for an EPC type
+		if ( (eer_array.length == 0 && eir_array.length == 0) || eer_array.length == 1 || eir_array.length == 1 )
 		{
-			alert("Please ensure all values are present");
+			alert("Please ensure values are present for Current and Potential ratings");
 			return false;
 		}
 
