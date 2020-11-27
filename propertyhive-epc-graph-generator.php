@@ -3,7 +3,7 @@
  * Plugin Name: Property Hive EPC Graph Generator
  * Plugin Uri: http://wp-property-hive.com/addons/epc-graph-generator/
  * Description: Add an EPC graph generator to the EPCs section of a property record 
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: PropertyHive
  * Author URI: http://wp-property-hive.com
  */
@@ -17,7 +17,7 @@ final class PH_EPC_Graph_Generator {
     /**
      * @var string
      */
-    public $version = '1.0.2';
+    public $version = '1.0.3';
 
     /**
      * @var Property Hive The single instance of the class
