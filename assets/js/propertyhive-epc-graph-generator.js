@@ -4,6 +4,9 @@ jQuery(document).ready(function()
 	{
 		e.preventDefault();
 
+		jQuery(this).html('Generating EPC...');
+		jQuery(this).attr('disabled', 'disabled');
+
 		var eer_current = jQuery('#eer_current').val();
 		var eer_potential = jQuery('#eer_potential').val();
 		var eir_current = jQuery('#eir_current').val();
@@ -66,6 +69,9 @@ jQuery(document).ready(function()
 			  			alert("An error occured whilst trying to generate the EPC");
 			  		}
 		  		}
+
+		  		jQuery('a.generate-epc').html('Generate EPC');
+				jQuery('a.generate-epc').attr('disabled', false);
 		  	}
 		});
 	});
