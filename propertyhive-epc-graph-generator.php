@@ -115,6 +115,10 @@ final class PH_EPC_Graph_Generator {
 
     public function epc_generator_meta_box()
     {
+        if ( get_option('propertyhive_epcs_stored_as', '') == 'urls' )
+        {
+            return;
+        }
 ?>
 
 <hr>
