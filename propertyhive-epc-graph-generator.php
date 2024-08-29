@@ -124,25 +124,25 @@ final class PH_EPC_Graph_Generator {
 <hr>
 
 <div style="float:left; width:50%; max-width:300px;">
-    <p class="form-field eer_current_field ">
-        <label for="eer_current">EER Current (1-100)</label>
+    <p class="form-field eer_current_field">
+        <label for="eer_current">EER Current (1-<?php echo apply_filters( 'propertyhive_epc_graph_generator_eer_current_max', 100 ); ?>)</label>
         <input type="number" class="short" name="eer_current" id="eer_current" min="1" max="100" value="" placeholder=""> 
     </p>
 
-    <p class="form-field eer_potential_field ">
-        <label for="eer_potential">EER Potential (1-100)</label>
+    <p class="form-field eer_potential_field">
+        <label for="eer_potential">EER Potential (1-<?php echo apply_filters( 'propertyhive_epc_graph_generator_eer_potential_max', 100 ); ?>)</label>
         <input type="number" class="short" name="eer_potential" id="eer_potential" min="1" max="100" value="" placeholder=""> 
     </p>
 </div>
 
 <div style="float:left; width:50%; max-width:300px;">
-    <p class="form-field eir_current_field ">
-        <label for="eir_current">EIR Current (1-100)</label>
+    <p class="form-field eir_current_field">
+        <label for="eir_current">EIR Current (1-<?php echo apply_filters( 'propertyhive_epc_graph_generator_eir_current_max', 100 ); ?>)</label>
         <input type="number" class="short" name="eir_current" id="eir_current" min="1" max="100" value="" placeholder=""> 
     </p>
 
-    <p class="form-field eir_potential_field ">
-        <label for="eir_potential">EIR Potential (1-100)</label>
+    <p class="form-field eir_potential_field">
+        <label for="eir_potential">EIR Potential (1-<?php echo apply_filters( 'propertyhive_epc_graph_generator_eir_potential_max', 100 ); ?>)</label>
         <input type="number" class="short" name="eir_potential" id="eir_potential" min="1" max="100" value="" placeholder=""> 
     </p>
 </div>
@@ -167,73 +167,60 @@ final class PH_EPC_Graph_Generator {
         return floor($y);
     }
 
-    private function convert_value_to_image_and_y($value)
+    private function convert_value_to_image_and_y($value, $bands)
     {
+        if ( count($bands) != 8 )
+        {
+            header("Content-type:application/json");
+            echo json_encode(array(
+                'success' => false,
+                'error' => 'Invalid number of bands. Should be 8 but ' . count($bands) . ' provided',
+            ));
+            wp_die();
+        }
+
+        // Determine if the chart is French based on the order of bands
+        $is_french = $bands[0] > $bands[1];
+
         $value = (int)$value;
         $image = '1-20.png';
         $y = 100;
-        if ( $value >= 1 && $value <= 20 )
-        {
-            $min_y = 275;
-            $max_y = 303;
 
-            $y = $max_y - $this->get_y($value, 1, 20, $min_y, $max_y);
+        // Image names for UK version
+        $uk_images = [
+            '1-20.png',
+            '21-38.png',
+            '39-54.png',
+            '55-68.png',
+            '69-80.png',
+            '81-91.png',
+            '92-100.png'
+        ];
 
-            $image = '1-20.png';
-        }
-        if ( $value >= 21 && $value <= 38 )
-        {
-            $min_y = 243;
-            $max_y = 271;
+        // Image names for French version (reversed order)
+        $french_images = array_reverse($uk_images);
 
-            $y = $max_y - $this->get_y($value, 21, 38, $min_y, $max_y);
+        // Choose the appropriate set of images
+        $images = $is_french ? $french_images : $uk_images;
 
-            $image = '21-38.png';
-        }
-        if ( $value >= 39 && $value <= 54 )
-        {
-            $min_y = 211;
-            $max_y = 239;
+        for ($i = 0; $i < count($bands) - 1; $i++) {
+            $min_value = $bands[$i];
+            $max_value = $bands[$i + 1] - 1;
 
-            $y = $max_y - $this->get_y($value, 39, 54, $min_y, $max_y);
+            // Handle the last band separately to include the upper limit
+            if ($i === count($bands) - 2) {
+                $max_value = $bands[$i + 1];
+            }
 
-            $image = '39-54.png';
-        }
-        if ( $value >= 55 && $value <= 68 )
-        {
-            $min_y = 179;
-            $max_y = 207;
+            if ($value >= $min_value && $value <= $max_value) {
+                // Calculate the y-position as in the original function
+                $min_y = 275 - (32 * $i);
+                $max_y = $min_y + 28;
 
-            $y = $max_y - $this->get_y($value, 55, 68, $min_y, $max_y);
-
-            $image = '55-68.png';
-        }
-        if ( $value >= 69 && $value <= 80 )
-        {
-            $min_y = 147;
-            $max_y = 175;
-
-            $y = $max_y - $this->get_y($value, 69, 80, $min_y, $max_y);
-
-            $image = '69-80.png';
-        }
-        if ( $value >= 81 && $value <= 91 )
-        {
-            $min_y = 115;
-            $max_y = 143;
-
-            $y = $max_y - $this->get_y($value, 81, 91, $min_y, $max_y);
-
-            $image = '81-91.png';
-        }
-        if ( $value >= 92 && $value <= 100 )
-        {
-            $min_y = 83;
-            $max_y = 111;
-
-            $y = $max_y - $this->get_y($value, 92, 100, $min_y, $max_y);
-
-            $image = '92-100.png';
+                $y = $max_y - $this->get_y($value, $min_value, $max_value, $min_y, $max_y);
+                $image = $images[$i];
+                break;
+            }
         }
 
         return array($image, $y);
@@ -269,18 +256,36 @@ final class PH_EPC_Graph_Generator {
                 'success' => false,
                 'error' => 'Please ensure values are present for Current and Potential ratings',
             ));
+            wp_die();
         }
 
         $background = imagecreatefrompng($background);
 
+        $bands = array(
+            1,
+            21,
+            39,
+            55,
+            69,
+            81,
+            92,
+            100
+        );
+
         // If EER ratings are input, get the correct coloured pointer images and their vertical positions
         if ( in_array($epc_type, array('eer_eir', 'eer_only')) )
         {
-            list($eer_current_image, $eer_current_y) = $this->convert_value_to_image_and_y($_POST['eer_current']);
+            $eer_current_bands = apply_filters( 'propertyhive_epc_graph_generator_bands', $bands );
+            $eer_current_bands = apply_filters( 'propertyhive_epc_graph_generator_eer_current_bands', $eer_current_bands );
+
+            list($eer_current_image, $eer_current_y) = $this->convert_value_to_image_and_y($_POST['eer_current'], $eer_current_bands);
             $eer_current = dirname(__FILE__) . '/assets/images/eer/' . $eer_current_image;
             $eer_current = imagecreatefrompng($eer_current);
 
-            list($eer_potential_image, $eer_potential_y) = $this->convert_value_to_image_and_y($_POST['eer_potential']);
+            $eer_potential_bands = apply_filters( 'propertyhive_epc_graph_generator_bands', $bands );
+            $eer_potential_bands = apply_filters( 'propertyhive_epc_graph_generator_eer_potential_bands', $eer_potential_bands );
+
+            list($eer_potential_image, $eer_potential_y) = $this->convert_value_to_image_and_y($_POST['eer_potential'], $eer_potential_bands);
             $eer_potential = dirname(__FILE__) . '/assets/images/eer/' . $eer_potential_image;
             $eer_potential = imagecreatefrompng($eer_potential);
         }
@@ -288,11 +293,17 @@ final class PH_EPC_Graph_Generator {
         // If EIR ratings are input, get the correct coloured pointer images and their vertical positions
         if ( in_array($epc_type, array('eer_eir', 'eir_only')) )
         {
-            list($eir_current_image, $eir_current_y) = $this->convert_value_to_image_and_y($_POST['eir_current']);
+            $eir_current_bands = apply_filters( 'propertyhive_epc_graph_generator_bands', $bands );
+            $eir_current_bands = apply_filters( 'propertyhive_epc_graph_generator_eir_current_bands', $eir_current_bands );
+
+            list($eir_current_image, $eir_current_y) = $this->convert_value_to_image_and_y($_POST['eir_current'], $eir_current_bands);
             $eir_current = dirname(__FILE__) . '/assets/images/eir/' . $eir_current_image;
             $eir_current = imagecreatefrompng($eir_current);
 
-            list($eir_potential_image, $eir_potential_y) = $this->convert_value_to_image_and_y($_POST['eir_potential']);
+            $eir_potential_bands = apply_filters( 'propertyhive_epc_graph_generator_bands', $bands );
+            $eir_potential_bands = apply_filters( 'propertyhive_epc_graph_generator_eir_potential_bands', $eir_potential_bands );
+
+            list($eir_potential_image, $eir_potential_y) = $this->convert_value_to_image_and_y($_POST['eir_potential'], $eir_potential_bands);
             $eir_potential = dirname(__FILE__) . '/assets/images/eir/' . $eir_potential_image;
             $eir_potential = imagecreatefrompng($eir_potential);
         }
@@ -361,6 +372,7 @@ final class PH_EPC_Graph_Generator {
                 'success' => false,
                 'error' => print_r($upload['error'], TRUE),
             ));
+            wp_die();
         }
         else
         {
@@ -383,6 +395,7 @@ final class PH_EPC_Graph_Generator {
                     'success' => false,
                     'error' => 'Failed inserting image attachment ' . $upload['file'] . ' - ' . print_r($attachment, TRUE),
                 ));
+                wp_die();
             }
             else
             {  
